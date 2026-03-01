@@ -2,10 +2,11 @@ import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
-from services.rag_service import process_pdf, query_rag
 
-# Load environment variables from .env file
+# Load environment variables before importing services that use them
 load_dotenv()
+
+from services.rag_service import process_pdf, query_rag
 
 app = Flask(__name__)
 CORS(app)
@@ -34,9 +35,12 @@ def upload():
         file.save(file_path)
         
         try:
+            print(f"Processing PDF: {file_path}")
             process_pdf(file_path)
+            print("Successfully processed PDF")
             return jsonify({"status": "PDF Indexed"})
         except Exception as e:
+            print(f"Error processing PDF: {str(e)}")
             return jsonify({"error": str(e)}), 500
     
     return jsonify({"error": "Invalid file type"}), 400
@@ -56,4 +60,4 @@ def ask():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=False)
